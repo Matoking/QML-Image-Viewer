@@ -14,7 +14,7 @@ symbian{
 }
 
 ICON = ImageViewer.svg
-TARGET = Image Viewer
+TARGET = ImageViewer
 VERSION = 0.90
 
 CONFIG += qt-components
@@ -24,12 +24,12 @@ CONFIG += qt-components
 # fail to install if self-signed. By default qmake uses the unprotected
 # range value if unprotected UID is defined for the application and
 # 0x2002CCCF value if protected UID is given to the application
-#symbian:DEPLOYMENT.installer_header = 0x2002CCCF
+symbian:DEPLOYMENT.installer_header = 0xA000D7CE
 
 # Allow network access on Symbian
 symbian {
     TARGET.CAPABILITY += NetworkServices
-    INCLUDEPATH += MW_LAYER_SYSTEMINCLUDE // Not sure if this is needed...
+    #INCLUDEPATH += MW_LAYER_SYSTEMINCLUDE // Not sure if this is needed...
     LIBS += -L\epoc32\release\armv5\lib -lremconcoreapi
     LIBS += -L\epoc32\release\armv5\lib -lremconinterfacebase
 }
