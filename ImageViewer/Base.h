@@ -45,6 +45,8 @@ public slots:
     void selectFolder();
 
     void changeFitToScreen(bool);
+
+    void getImageID(QString);
 };
 
 #endif // BASE_H

@@ -7,7 +7,7 @@ Base::Base(QWidget *parent) :
 
     QCoreApplication::setApplicationName("ImageViewer");
     QCoreApplication::setOrganizationName("Matoking");
-    //viewer.setOrientation(QmlApplicationViewer::ScreenOrientationAuto);
+    viewer.setOrientation(QmlApplicationViewer::ScreenOrientationAuto);
     qmlRegisterType<MediakeyCaptureItem>("Mediakey", 1, 0, "MediakeyCapture");
     viewer.setMainQmlFile(QLatin1String("qml/ImageViewer/main.qml"));
     viewer.showExpanded();
@@ -62,6 +62,27 @@ void Base::changeFitToScreen(bool fitToScreen)
     settings->setValue("main/resizeToFit", fitToScreen);
     settings->sync();
     checkSettings();
+}
+
+void Base::getImageID(QString imageName)
+{
+    int count = 1;
+    int index;
+
+    while(true)
+    {
+        if (images[count].isNull()) break;
+        if (images[count] == imageName)
+        {
+            index = count;
+            break;
+        }
+        else {
+            count++;
+        }
+    }
+
+    QMetaObject::invokeMethod(viewer.rootObject(), "setCurrentID", Q_ARG(QVariant, count));
 }
 
 void Base::nextImage(QString imageName)

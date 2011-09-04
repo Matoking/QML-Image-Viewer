@@ -22,6 +22,8 @@ Page {
     property int listID;
     property int currentID;
 
+    property int totalImages;
+
     signal back();
 
     signal goForward(string source);
@@ -171,6 +173,46 @@ Page {
                 verticalAlignment: Text.AlignVCenter
 
             }
+
+            Text {
+                id: zoomText
+                visible: false
+                color: "white"
+
+                anchors {
+                    top: parent.top
+                    bottom: parent.bottom
+                    left: parent.left
+                    right: parent.right
+                }
+
+                text: "100 %"
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignTop
+
+                style: Text.Outline
+                styleColor: "black"
+            }
+
+            Text {
+                id: totalText
+                visible: false
+                color: "white"
+
+                anchors {
+                    top: parent.top
+                    bottom: parent.bottom
+                    left: parent.left
+                    right: parent.right
+                }
+
+                text: "0/1"
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignBottom
+
+                style: Text.Outline
+                styleColor: "black"
+            }
         }
 
         Timer {
@@ -197,13 +239,25 @@ Page {
             fitToScreen();
             resize();
             centerInResized();
+            showIcons();
+            setZoomText();
             return;
         }
         else {
             currentImage.scale = 1.0;
             resize();
             centerIn();
+            setZoomText();
         }
+    }
+
+    function setZoomText() {
+        var zoomLevel = Math.round(currentImage.scale * 100);
+        zoomText.text = "" + zoomLevel + " %";
+    }
+
+    function setTotalText() {
+        totalText.text = currentID + " / " + totalImages;
     }
 
     function zoomUp() {
@@ -227,6 +281,7 @@ Page {
         if (currentImage.height <= page.height) flickable.contentY = 0;
 
         resize();
+        showIcons();
     }
 
     function zoomDown() {
@@ -250,6 +305,7 @@ Page {
         if (originalHeight * currentImage.scale <= page.height) flickable.contentY = 0;
 
         resize();
+        showIcons();
     }
 
     function centerOnZoom() {
@@ -269,6 +325,8 @@ Page {
         imageHandled = false;
         imageFlicked = false;
         currentID = id;
+        base.getImageID(string);
+        setTotalText();
         currentImage.scale = 1;
         currentImage.source = string;
         resize();
@@ -293,6 +351,7 @@ Page {
                 resize();
             }
             if (resizeToFit == true) fitToScreen();
+            setZoomText();
             return;
         }
         if (currentImage.status == Image.Error) {
@@ -350,6 +409,7 @@ Page {
 
     function returnToGrid() {
         currentImage.source = "";
+        hideIcons();
         back();
     }
 
@@ -366,6 +426,9 @@ Page {
         zoomDownIcon.visible = true;
         zoomUpIcon.visible = true;
         backToGrid.visible = true;
+        setZoomText();
+        zoomText.visible = true;
+        totalText.visible = true;
         timer.restart();
     }
 
@@ -375,6 +438,8 @@ Page {
         zoomDownIcon.visible = false;
         zoomUpIcon.visible = false;
         backToGrid.visible = false;
+        zoomText.visible = false;
+        totalText.visible = false;
     }
 
     function nextImage(sourceImage) {

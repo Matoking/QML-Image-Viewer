@@ -97,18 +97,25 @@ Window {
     Component.onCompleted: showGrid();
 
     function showImage(source, id) {
+        imageView.totalImages = gridList.getTotal();
         toolBar.visible = false;
         statusBar.visible = false;
         statusBar.enabled = false;
         pageStack.anchors.top = window.top;
         imageView.showImage(source, id);
-        gridList.setIndex(id);
+        base.getImageID(source);
         pageStack.push(imageView);
         imageOpen = true;
     }
 
+    function setCurrentID(id) {
+        gridList.setIndex(id);
+        imageView.currentID = id;
+    }
+
     function selectFolder(folderName) {
         gridList.setFolder(folderName);
+        imageView.totalImages = gridList.getTotal();
     }
 
     function selectSettingsFolder(folderName) {

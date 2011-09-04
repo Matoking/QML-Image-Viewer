@@ -83,6 +83,10 @@ Page {
         gridView.currentIndex = value;
     }
 
+    function getTotal() {
+        return gridView.count;
+    }
+
     function getSource() {
         return gridView.currentItem.image.source;
     }
