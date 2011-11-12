@@ -29,6 +29,11 @@ Page {
 
         highlightFollowsCurrentItem: true
 
+        ScrollDecorator {
+            id: scrollDecorator
+            flickableItem: gridView
+        }
+
         FolderListModel {
             id: folderModel
             nameFilters: ["*.jpg", "*.png", "*.gif", "*.jpeg"]

@@ -19,12 +19,21 @@ Base::Base(QWidget *parent) :
     checkSettings();
 }
 
+void Base::quitApplication()
+{
+    settings->sync();
+
+    QApplication::quit();
+}
+
 void Base::checkSettings()
 {
     if (settings->contains("main/imageFolder") == false)
     {
         settings->setValue("main/imageFolder", QString("nothing"));
         settings->setValue("main/resizeToFit", true);
+        settings->setValue("main/showScrollIndicators", false);
+        settings->setValue("main/backgroundColor", "black");
 
         settings->sync();
     }
@@ -33,6 +42,9 @@ void Base::checkSettings()
         QMetaObject::invokeMethod(viewer.rootObject(), "selectFolder", Q_ARG(QVariant, folderString));
         QMetaObject::invokeMethod(viewer.rootObject(), "selectSettingsFolder", Q_ARG(QVariant, settings->value("main/imageFolder").toString()));
         QMetaObject::invokeMethod(viewer.rootObject(), "selectResizeToFit", Q_ARG(QVariant, settings->value("main/resizeToFit").toBool()));
+        QMetaObject::invokeMethod(viewer.rootObject(), "showScrollIndicators", Q_ARG(QVariant, settings->value("main/showScrollIndicators").toBool()));
+        QMetaObject::invokeMethod(viewer.rootObject(), "setBGColor", Q_ARG(QVariant, settings->value("main/backgroundColor").toString()));
+
         checkDirectory();
     }
     return;
@@ -60,6 +72,20 @@ void Base::selectFolder()
 void Base::changeFitToScreen(bool fitToScreen)
 {
     settings->setValue("main/resizeToFit", fitToScreen);
+    settings->sync();
+    checkSettings();
+}
+
+void Base::changeScrollIndicators(bool showScrollIndicators)
+{
+    settings->setValue("main/showScrollIndicators", showScrollIndicators);
+    settings->sync();
+    checkSettings();
+}
+
+void Base::changeBGColor(QString bgColor)
+{
+    settings->setValue("main/backgroundColor", bgColor);
     settings->sync();
     checkSettings();
 }
@@ -92,7 +118,9 @@ void Base::nextImage(QString imageName)
 
     while(true)
     {
-        if (images[count].isNull()) break;
+        if (images[count].isNull()) {
+            break;
+        }
         if (images[count] == imageName)
         {
             index = count;
@@ -106,6 +134,13 @@ void Base::nextImage(QString imageName)
     QString fileName = images[count+1];
     int nextIndex = index + 1;
 
+    if (images[count] == imageName && images[count+1].isNull())
+    {
+        nextIndex = 1;
+        fileName = images[1];
+        QMetaObject::invokeMethod(viewer.rootObject(), "showImage", Q_ARG(QVariant, fileName), Q_ARG(QVariant, nextIndex));
+        return;
+    }
     if (fileName.isEmpty()) return;
 
     QMetaObject::invokeMethod(viewer.rootObject(), "showImage", Q_ARG(QVariant, fileName), Q_ARG(QVariant, nextIndex));
@@ -130,11 +165,29 @@ void Base::previousImage(QString imageName)
     }
 
     QString fileName = images[count-1];
-    int nextIndex = index - 1;
+    int previousIndex = index - 1;
 
+    if (previousIndex < 1)
+    {
+        count = images.size();
+        while (true)
+        {
+            if (images[count].isNull())
+            {
+                count--;
+            }
+            else {
+                break;
+            }
+        }
+        previousIndex = count;
+        fileName = images[previousIndex];
+        QMetaObject::invokeMethod(viewer.rootObject(), "showImage", Q_ARG(QVariant, fileName), Q_ARG(QVariant, previousIndex));
+        return;
+    }
     if (fileName.isEmpty()) return;
 
-    QMetaObject::invokeMethod(viewer.rootObject(), "showImage", Q_ARG(QVariant, fileName), Q_ARG(QVariant, nextIndex));
+    QMetaObject::invokeMethod(viewer.rootObject(), "showImage", Q_ARG(QVariant, fileName), Q_ARG(QVariant, previousIndex));
 }
 
 void Base::checkDirectory()

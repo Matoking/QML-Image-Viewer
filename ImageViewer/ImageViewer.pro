@@ -59,3 +59,5 @@ OTHER_FILES += \
 HEADERS += \
     Base.h \
     MediakeyCaptureItem.h
+
+

@@ -34,6 +34,8 @@ public:
 signals:
 
 public slots:
+    void quitApplication();
+
     void checkSettings();
 
     void nextImage(QString);
@@ -45,6 +47,8 @@ public slots:
     void selectFolder();
 
     void changeFitToScreen(bool);
+    void changeScrollIndicators(bool);
+    void changeBGColor(QString);
 
     void getImageID(QString);
 };

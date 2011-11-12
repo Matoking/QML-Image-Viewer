@@ -73,10 +73,12 @@ Window {
             anchors.fill: parent
 
             onOpenFolderBrowser: base.selectFolder();
-            onResizeToFitChanged: base.changeFitToScreen(value);
+            onResizeToFitChanged: base.changeFitToScreen(resizeToFit);
+            onShowScrollBarChanged: base.changeScrollIndicators(scrollBarChanged);
+            onBgColorChanged: base.changeBGColor(bgColor);
         }
 
-        }
+    }
 
     ToolBar {
         id: toolBar
@@ -109,7 +111,7 @@ Window {
     }
 
     function setCurrentID(id) {
-        gridList.setIndex(id);
+        gridList.setIndex(id-1);
         imageView.currentID = id;
     }
 
@@ -125,6 +127,17 @@ Window {
     function selectResizeToFit(resizeToFit) {
         imageView.resizeToFit = resizeToFit;
         settings.setResizeToFit(resizeToFit);
+    }
+
+    function showScrollIndicators(scrollBarsEnabled) {
+        imageView.showScrollIndicators(scrollBarsEnabled);
+        settings.setScrollIndicators(scrollBarsEnabled);
+    }
+
+    function setBGColor(newColor)
+    {
+        settings.setBGColor(newColor);
+        imageView.setBGColor(newColor);
     }
 
     function showGrid() {
@@ -156,7 +169,7 @@ Window {
 
     function back() {
         if (settingsOpen == false) {
-            Qt.quit();
+            base.quitApplication ();
             return;
         }
         else {

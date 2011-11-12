@@ -24,6 +24,8 @@ Page {
 
     property int totalImages;
 
+    property bool detailsVisible: false;
+
     signal back();
 
     signal goForward(string source);
@@ -41,6 +43,32 @@ Page {
 
         onHeightChanged: adjustImage();
         onWidthChanged: adjustImage();
+
+        Rectangle {
+            id: rectangle
+
+            color: "black"
+
+            x:-1000
+            y:-1000
+            width:6000
+            height:6000
+        }
+
+        Flickable {
+            id: flickableOut
+
+            x: -5000
+            y: -5000
+
+            height: 1
+            width: 1
+        }
+
+        ScrollDecorator {
+            id: scrollDecorator
+            flickableItem: flickable
+        }
 
         Image {
             id: currentImage
@@ -85,6 +113,22 @@ Page {
                 id: zoomDownIcon
                 opacity: 0.5
                 source: "gfx/zoom_down.png"
+                anchors.centerIn: parent
+                visible: false
+            }
+        }
+
+        MouseArea {
+            id: areaInfo
+            x: page.width - 80 + flickable.contentX
+            y: 0 + flickable.contentY
+            width: 80
+            height: 80
+            onClicked: showInfo();
+            Image {
+                id: infoIcon
+                opacity: 0.5
+                source: "gfx/information.png"
                 anchors.centerIn: parent
                 visible: false
             }
@@ -155,6 +199,46 @@ Page {
                 height: 100
                 width: 100
             }
+
+            Rectangle {
+                id: detailsRectangle
+
+                color: "gainsboro"
+                opacity: 0.5
+
+                scale: 1.05
+
+                visible: false
+
+                anchors {
+                    top: detailsText.top
+                    bottom: detailsText.bottom
+                    left: detailsText.left
+                    right: detailsText.right
+                }
+
+            }
+
+            Text {
+                id: detailsText
+                visible: false
+                color: "white"
+
+                font.pointSize: 6
+
+                anchors {
+                    centerIn: parent
+                }
+
+                text: "File name:\nsomething.jpg"
+                wrapMode: Text.WordWrap
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+
+                style: Text.Outline
+                styleColor: "black"
+            }
+
             Text {
                 id: errorText
                 visible: false
@@ -186,6 +270,8 @@ Page {
                     right: parent.right
                 }
 
+                font.pointSize: 5
+
                 text: "100 %"
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignTop
@@ -206,6 +292,8 @@ Page {
                     right: parent.right
                 }
 
+                font.pointSize: 5
+
                 text: "0/1"
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignBottom
@@ -222,6 +310,19 @@ Page {
             repeat: false
             onTriggered: hideIcons();
         }
+    }
+
+    function showScrollIndicators(scrollBarsEnabled) {
+        if (scrollBarsEnabled === true)
+            scrollDecorator.flickableItem = flickable;
+        else if (scrollBarsEnabled === false)
+            scrollDecorator.flickableItem = flickableOut;
+    }
+
+    function pinched() {
+        setZoomText();
+        centerIn();
+        resize();
     }
 
     function flicked() {
@@ -249,6 +350,7 @@ Page {
             centerIn();
             setZoomText();
         }
+        imageHandled = true;
     }
 
     function setZoomText() {
@@ -306,6 +408,7 @@ Page {
 
         resize();
         showIcons();
+        flickable.returnToBounds();
     }
 
     function centerOnZoom() {
@@ -329,6 +432,7 @@ Page {
         setTotalText();
         currentImage.scale = 1;
         currentImage.source = string;
+
         resize();
     }
 
@@ -352,6 +456,12 @@ Page {
             }
             if (resizeToFit == true) fitToScreen();
             setZoomText();
+            var fileName;
+            var filePath = String(currentImage.source);
+
+            var separatorID = filePath.lastIndexOf("/");
+            fileName = filePath.substring(separatorID+1);
+            detailsText.text = "File name:\n" + fileName + "\n\nSize:\n"+originalHeight+"x"+originalWidth;
             return;
         }
         if (currentImage.status == Image.Error) {
@@ -413,6 +523,11 @@ Page {
         back();
     }
 
+    function showInfo() {
+        detailsVisible = !detailsVisible;
+        showIcons();
+    }
+
     function addListItem(imageFileName) {
         listID++;
         console.log("Added " + imageFileName);
@@ -426,10 +541,26 @@ Page {
         zoomDownIcon.visible = true;
         zoomUpIcon.visible = true;
         backToGrid.visible = true;
-        setZoomText();
+        infoIcon.visible = true;
         zoomText.visible = true;
         totalText.visible = true;
+        setZoomText();
+
+        if (detailsVisible === false) {
+            detailsText.visible = false;
+            detailsRectangle.visible = false;
+        }
+        else {
+            detailsText.visible = true;
+            detailsRectangle.visible = true;
+        }
+
         timer.restart();
+    }
+
+    function setBGColor(newColor)
+    {
+        rectangle.color = newColor;
     }
 
     function hideIcons() {
@@ -438,8 +569,11 @@ Page {
         zoomDownIcon.visible = false;
         zoomUpIcon.visible = false;
         backToGrid.visible = false;
+        infoIcon.visible = false;
         zoomText.visible = false;
         totalText.visible = false;
+        detailsText.visible = false;
+        detailsRectangle.visible = false;
     }
 
     function nextImage(sourceImage) {

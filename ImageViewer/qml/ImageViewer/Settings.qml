@@ -6,7 +6,9 @@ Page {
 
     signal openFolderBrowser();
 
-    signal resizeToFitChanged(bool value);
+    signal resizeToFitChanged(bool resizeToFit);
+    signal showScrollBarChanged(bool scrollBarChanged);
+    signal bgColorChanged(string bgColor);
 
     function selectFolder(folderLocation) {
         folderTextfield.text = folderLocation;
@@ -16,14 +18,26 @@ Page {
         generalListModel.setProperty(0, "selected", resizeToFit);
     }
 
-    anchors.fill: parent
+    function setScrollIndicators(scrollBarsEnabled) {
+        generalListModel.setProperty(1, "selected", scrollBarsEnabled);
+    }
+
+    function setBGColor(bgColor)
+    {
+        colorSelection.subTitle = bgColor;
+    }
+
+    anchors {
+        top: parent.top
+        bottom: parent.bottom
+    }
 
     Flickable {
         id: flickable
 
         anchors.fill: parent
 
-        contentHeight: folderSelectButton.y + folderSelectButton.height
+        contentHeight: colorSelection.y + colorSelection.height + 50
 
         clip: true
 
@@ -66,31 +80,85 @@ Page {
 
         ListView {
             id: generalListView
+
+            interactive: false
+
             anchors {
                 top: folderTitle.bottom
                 topMargin: 60
+                bottom: parent.bottom
                 left: parent.left
                 right: parent.right
             }
-
 
             model: generalListModel
             delegate: generalListDelegate
 
         }
 
+        SelectionListItem {
+            id: colorSelection
+            title: "Background color"
+            subTitle: colorDialog.selectedIndex >= 0
+                      ? colorDialog.model.get(colorDialog.selectedIndex).name
+                      : "Please select"
+
+            anchors {
+                left: parent.left
+                right: parent.right
+            }
+
+            y: 235
+
+            onClicked: colorDialog.open();
+
+            SelectionDialog {
+                id: colorDialog
+                titleText: "Select one of the colors"
+                selectedIndex: -1
+                model: ListModel {
+                    ListElement { name: "black" }
+                    ListElement { name: "white" }
+                    ListElement { name: "blue" }
+                    ListElement { name: "darkblue" }
+                    ListElement { name: "lightblue" }
+                    ListElement { name: "red" }
+                    ListElement { name: "pink" }
+                    ListElement { name: "darkred" }
+                    ListElement { name: "green" }
+                    ListElement { name: "darkgreen" }
+                    ListElement { name: "red" }
+                    ListElement { name: "darkred" }
+                    ListElement { name: "pink" }
+                    ListElement { name: "gray" }
+                    ListElement { name: "lightgray" }
+                    ListElement { name: "darkgray" }
+                }
+
+                onSelectedIndexChanged: bgColorChanged(colorDialog.model.get(colorDialog.selectedIndex).name)
+            }
+        }
+
         ListModel {
             id: generalListModel
-
-            function changeSelection(id, value) {
-                if (id === 0) resizeToFitChanged(value);
-            }
 
             ListElement {
                 name: "Resize to fit"
                 role: "Title"
                 selected: true
             }
+
+            ListElement {
+                name: "Show scroll indicators"
+                role: "Title"
+                selected: false
+            }
+
+            function changeSelection(id, value) {
+                if (id === 0) resizeToFitChanged(value);
+                if (id === 1) showScrollBarChanged(value);
+            }
+
         }
     }
     Component {
